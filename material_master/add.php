@@ -22,10 +22,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Material Name is required.";
     }
 
-    $valid_uom = ["KG", "Liter", "Pieces", "Meter"];
-    if (!in_array($uom, $valid_uom)) {
+    $uCheck = $mysqli->prepare("SELECT id FROM uom_master WHERE uom_name=? AND status='Active'");
+    $uCheck->bind_param("s", $uom);
+    $uCheck->execute();
+    $uResult = $uCheck->get_result();
+
+    if ($uResult->num_rows == 0) {
         $errors[] = "Invalid UOM selected.";
     }
+    $uCheck->close();
+
 
     if ($cost_per_unit === "" || !is_numeric($cost_per_unit)) {
         $errors[] = "Cost per Unit must be a number.";
@@ -77,15 +83,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                value="<?php echo htmlspecialchars($material_name); ?>" required>
     </div>
 
-    <div class="col-md-6">
-        <label class="form-label">Unit of Measurement *</label>
-        <select name="uom" class="form-select">
-            <option value="KG" <?php if($uom == "KG") echo "selected"; ?>>KG</option>
-            <option value="Liter" <?php if($uom == "Liter") echo "selected"; ?>>Liter</option>
-            <option value="Pieces" <?php if($uom == "Pieces") echo "selected"; ?>>Pieces</option>
-            <option value="Meter" <?php if($uom == "Meter") echo "selected"; ?>>Meter</option>
-        </select>
-    </div>
+<div class="col-md-6">
+    <label class="form-label">Unit of Measurement *</label>
+    <select name="uom" class="form-select">
+        <?php
+        $uoms = $mysqli->query("SELECT uom_name FROM uom_master WHERE status='Active'");
+        while ($u = $uoms->fetch_assoc()):
+        ?>
+            <option value="<?= $u['uom_name'] ?>"
+                <?= ($uom == $u['uom_name']) ? 'selected' : '' ?>>
+                <?= $u['uom_name'] ?>
+            </option>
+        <?php endwhile; ?>
+    </select>
+</div>
+
 
     <div class="col-md-6">
         <label class="form-label">Cost per Unit *</label>

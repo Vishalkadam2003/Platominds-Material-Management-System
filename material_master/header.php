@@ -29,6 +29,7 @@
 
     <div id="nav" class="collapse navbar-collapse">
       <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="uom_list.php">Manage UOM</a></li>
         <li class="nav-item">
           <a class="nav-link" href="list.php">Materials</a>
         </li>
